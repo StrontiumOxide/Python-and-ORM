@@ -9,6 +9,8 @@ class Publisher(Base):
     id = sql.Column(sql.Integer, primary_key=True)
     name = sql.Column(sql.Text, nullable=False)
 
+    book = relationship("Book", back_populates="publisher")
+
     def __str__(self) -> str:
         return f'Издатель: "{self.name}" №{self.id}'
     
@@ -19,16 +21,19 @@ class Book(Base):
     title = sql.Column(sql.Text, nullable=False)
     id_publisher = sql.Column(sql.Integer, sql.ForeignKey("publisher.id"), nullable=False)
 
-    publisher = relationship(Publisher, backref="publisher")
+    publisher = relationship("Publisher", back_populates="book")
+    stock = relationship("Stock", back_populates="book")
 
     def __str__(self) -> str:
         return f'Книга: "{self.title}" №{self.id}, id издательства: {self.id_publisher}' 
-
+ 
 class Shop(Base):
     __tablename__ = "shop"
 
     id = sql.Column(sql.Integer, primary_key=True)
     name = sql.Column(sql.Text, nullable=False)
+
+    stock = relationship("Stock", back_populates="shop")
 
     def __str__(self) -> str:
         return f'Книга: "{self.name}" №{self.id}'
@@ -41,8 +46,9 @@ class Stock(Base):
     id_shop = sql.Column(sql.Integer, sql.ForeignKey("shop.id"), nullable=False)
     count = sql.Column(sql.Integer, nullable=False)
 
-    book = relationship(Book, backref="book")
-    shop = relationship(Shop, backref="shop")
+    book = relationship("Book", back_populates="stock")
+    shop = relationship("Shop", back_populates="stock")
+    sale = relationship("Sale", back_populates="stock")
 
     def __str__(self) -> str:
         return f'id: "{self.id}", id-книги: {self.id_book}, id-магазина: {self.id_shop}, Количество книг: {self.count}'
@@ -56,7 +62,7 @@ class Sale(Base):
     id_stock = sql.Column(sql.Integer, sql.ForeignKey("stock.id"), nullable=False)
     count = sql.Column(sql.Integer, nullable=False)
 
-    stock = relationship(Stock, backref="stock")
+    stock = relationship("Stock", back_populates="sale")
 
     def __str__(self) -> str:
         return f'id: "{self.id}", Цена книги: {self.price}, Дата покупки: {self.date_sale}, id-запаса: {self.id_stock}, Количество проданного: {self.count} '
